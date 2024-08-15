@@ -14,8 +14,6 @@ const verifyJwt = async (req, res, next) => {
   
   const token = authHeader.split(' ')[1];
 
-
-  // Verifica si el token está en la lista de bloqueo
   const blacklistedToken = await TokenBlacklist.findOne({ where: { token } });
   if (blacklistedToken) {
     return next({
