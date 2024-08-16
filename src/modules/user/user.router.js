@@ -1,5 +1,6 @@
 const verifyJwt = require('../../middlewares/authenticate.middleware');
 const verifyRole = require('../../middlewares/verifyRole.middleware');
+const createUserValidator = require('../../validators/user.validator');
 const { getAll, create, getOne, remove, update, login, bootstrapAmin } = require('./user.controllers');
 const express = require('express');
 
@@ -7,7 +8,7 @@ const routerUser = express.Router();
 
 routerUser.route('/')
   .get(verifyJwt, verifyRole, getAll)
-  .post(verifyJwt, verifyRole, create);
+  .post(verifyJwt, verifyRole, createUserValidator, create);
 
 routerUser.route('/setup')
   .post(bootstrapAmin);
