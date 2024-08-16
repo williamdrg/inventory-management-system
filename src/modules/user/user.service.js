@@ -39,6 +39,7 @@ const fetchUserById = async (id) => {
 };
 
 const deleteUser = async (id) => {
+  if (parseInt(id) === 1) throw { status: 403, message: 'Superuser cannot be deleted.' };
   const result =  await User.destroy({ where: {id} });
   if(!result) throw { status: 404, message: 'user not found' };
   return result;

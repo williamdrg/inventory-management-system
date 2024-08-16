@@ -1,5 +1,5 @@
 const verifyRole = (req, res, next) => {
-  console.log('role', req.user);
+  // console.log('role', req.user);
   if (req.user.role !== 'admin') {
     return next({
       status: 403,

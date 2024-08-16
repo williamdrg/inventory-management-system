@@ -26,15 +26,14 @@ const getOne = catchError(async(req, res) => {
 
 const remove = catchError(async(req, res) => {
   const { id } = req.params;
-  await deleteUser(id);
+  const { token, authUserId } = getToken();
+  await deleteUser(id, token, authUserId);
   return res.sendStatus(204);
 });
 
 const update = catchError(async(req, res) => {
   const { id } = req.params;
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  const token = authHeader.split(' ')[1];
-  const authUserId = req.user.id;
+  const { token, authUserId } = getToken();
 
   const { firstName, lastName, dni, role } = req.body;
   const user = await updateUser(id, token, authUserId, { firstName, lastName, dni, role });
@@ -45,6 +44,13 @@ const bootstrapAmin = catchError(async (req, res) => {
   const { firstName, lastName, dni, email, password } = req.body;
   const user = await bootstrapUser({ firstName, lastName, dni, email, password });
   return res.status(201).json(user);
+});
+
+const getToken = catchError( async (req) => {
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  const token = authHeader.split(' ')[1];
+  const authUserId = req.user.id;
+  return { token, authUserId };
 });
 
 module.exports = {
