@@ -38,11 +38,16 @@ const fetchUserById = async (id) => {
   return user;
 };
 
-const deleteUser = async (id) => {
+const deleteUser = async (id, token, authUserId) => {
   if (parseInt(id) === 1) throw { status: 403, message: 'Superuser cannot be deleted.' };
   const result =  await User.destroy({ where: {id} });
   if(!result) throw { status: 404, message: 'user not found' };
-  return result;
+
+  if (parseInt(id) !== 1 && parseInt(authUserId) === parseInt(id)) {
+    await revokeToken(token);
+    return { message: 'User role updated. Please log in again to continue.' };
+  }
+  return;
 };
 
 const updateUser = async (id, token, authUserId, user) => {

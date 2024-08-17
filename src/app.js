@@ -22,6 +22,6 @@ app.get('/', (req, res) => {
 });
 
 // middlewares después de las rutas
-app.use(errorRouter);
+errorRouter(app);
 
 module.exports = app;

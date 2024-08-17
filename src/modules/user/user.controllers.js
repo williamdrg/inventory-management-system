@@ -26,9 +26,11 @@ const getOne = catchError(async(req, res) => {
 
 const remove = catchError(async(req, res) => {
   const { id } = req.params;
+
   const { token, authUserId } = getToken(req);
+ 
   await deleteUser(id, token, authUserId);
-  return res.sendStatus(204);
+  return res.sendStatus (204);
 });
 
 const update = catchError(async(req, res) => {

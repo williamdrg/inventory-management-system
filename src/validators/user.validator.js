@@ -15,7 +15,7 @@ const createUserValidator = [
   check('dni')
     .exists({ checkFalsy: true }).withMessage('DNI is required')
     .isInt().withMessage('DNI must be an integer')
-    .isLength({ min: 7, max: 10 }).withMessage('DNI must be between 7 and 10 digits'),
+    .isLength({ min: 6, max: 10 }).withMessage('DNI must be between 7 and 10 digits'),
 
   check('email')
     .exists({ checkFalsy: true }).withMessage('Email is required')
