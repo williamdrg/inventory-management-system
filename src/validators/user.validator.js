@@ -2,74 +2,71 @@ const { check } = require('express-validator');
 const validateResult = require('../utils/validate');
 
 const createUserValidator = [
-  check('firstName', 'Error with the firstName attribute')
-    .exists()
-    .withMessage('The firstName is not being sent')
-    .notEmpty()
-    .withMessage('First name should not be empty')
-    .isString()
-    .withMessage('The data type must be a string')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('The firstName must be between 1 and 50 characters long')
-    .trim(),
+  check('firstName')
+    .exists({ checkFalsy: true }).withMessage('First name is required')
+    .isString().withMessage('First name must be a string')
+    .isLength({ min: 1, max: 50 }).withMessage('First name must be between 1 and 50 characters long'),
 
-  check('lastName', 'Error with the lastName attribute')
-    .exists()
-    .withMessage('The lastName is not being sent')
-    .notEmpty()
-    .withMessage('Last name should not be empty')
-    .isString()
-    .withMessage('The data type must be a string')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('The lastName must be between 1 and 50 characters long')
-    .trim(),
+  check('lastName')
+    .exists({ checkFalsy: true }).withMessage('Last name is required')
+    .isString().withMessage('Last name must be a string')
+    .isLength({ min: 1, max: 50 }).withMessage('Last name must be between 1 and 50 characters long'),
 
-  check('dni', 'Error with the dni field')
-    .exists()
-    .withMessage('DNI is required')
-    .notEmpty()
-    .withMessage('DNI field cannot be empty')
-    .isInt()
-    .withMessage('DNI should be an integer')
-    .custom(value => {
-      if (value.toString().length < 7 || value.toString().length > 10) {
-        throw new Error('DNI must be between 7 and 10 digits');
-      }
-      return true;
-    }),
+  check('dni')
+    .exists({ checkFalsy: true }).withMessage('DNI is required')
+    .isInt().withMessage('DNI must be an integer')
+    .isLength({ min: 7, max: 10 }).withMessage('DNI must be between 7 and 10 digits'),
 
-  check('email', 'Error with the email field')
-    .exists()
-    .withMessage('Email is required')
-    .notEmpty()
-    .withMessage('Email field cannot be empty')
-    .isString()
-    .withMessage('Email should be a string')
-    .isEmail()
-    .withMessage('Email should be a valid email address')
-    .isLength({ min: 10, max: 50 })
-    .withMessage('Email should be between 10 and 50 characters long')
-    .trim(),
+  check('email')
+    .exists({ checkFalsy: true }).withMessage('Email is required')
+    .isEmail().withMessage('Must be a valid email address')
+    .isLength({ min: 10, max: 50 }).withMessage('Email must be between 10 and 50 characters long'),
 
-  check('password', 'Error with the password field')
-    .exists()
-    .withMessage('Password is required')
-    .notEmpty()
-    .withMessage('Password field cannot be empty')
-    .isString()
-    .withMessage('Password should be a string')
-    .isLength({ min: 4 })
-    .withMessage('Password must be at least 4 characters long'),
-  /* 
-  check('role', 'Error with the role field')
-    .exists()
-    .withMessage('Role is required')
-    .notEmpty()
-    .withMessage('Role field cannot be empty')
-    .isIn(['admin', 'guest'])
-    .withMessage('Role must be either \'admin\' or \'guest\''), */
+  check('password')
+    .exists({ checkFalsy: true }).withMessage('Password is required')
+    .isString().withMessage('Password must be a string')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
 
   validateResult
 ];
 
-module.exports = createUserValidator;
+const loginValidator = [
+  check('email')
+    .exists({ checkFalsy: true }).withMessage('Email is required')
+    .isEmail().withMessage('Email should be a valid email address')
+    .isLength({ min: 10, max: 50 }).withMessage('Email should be between 10 and 50 characters long')
+    .trim(),
+
+  check('password')
+    .exists({ checkFalsy: true }).withMessage('Password is required')
+    .isString().withMessage('Password should be a string')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
+  
+  validateResult
+];
+
+const updateUserValidator = [
+  check('firstName')
+    .optional()
+    .isString().withMessage('First name must be a string')
+    .isLength({ min: 1, max: 50 }).withMessage('First name must be between 1 and 50 characters long'),
+
+  check('lastName')
+    .optional()
+    .isString().withMessage('Last name must be a string')
+    .isLength({ min: 1, max: 50 }).withMessage('Last name must be between 1 and 50 characters long'),
+
+  check('email')
+    .optional()
+    .isEmail().withMessage('Must be a valid email address')
+    .isLength({ min: 10, max: 50 }).withMessage('Email must be between 10 and 50 characters long'),
+
+  validateResult
+];
+
+
+module.exports = {
+  createUserValidator,
+  loginValidator,
+  updateUserValidator
+};

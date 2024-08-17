@@ -15,7 +15,7 @@ const create = catchError(async(req, res) => {
 const login = catchError(async(req, res) => {
   const { email, password } = req.body;
   const user = await loginSevices(email, password);
-  res.json(user); 
+  res.json(user);   
 });
 
 const getOne = catchError(async(req, res) => {
@@ -26,14 +26,14 @@ const getOne = catchError(async(req, res) => {
 
 const remove = catchError(async(req, res) => {
   const { id } = req.params;
-  const { token, authUserId } = getToken();
+  const { token, authUserId } = getToken(req);
   await deleteUser(id, token, authUserId);
   return res.sendStatus(204);
 });
 
 const update = catchError(async(req, res) => {
   const { id } = req.params;
-  const { token, authUserId } = getToken();
+  const { token, authUserId } = getToken(req);
 
   const { firstName, lastName, dni, role } = req.body;
   const user = await updateUser(id, token, authUserId, { firstName, lastName, dni, role });
@@ -46,12 +46,12 @@ const bootstrapAmin = catchError(async (req, res) => {
   return res.status(201).json(user);
 });
 
-const getToken = catchError( async (req) => {
+const getToken = (req) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   const token = authHeader.split(' ')[1];
   const authUserId = req.user.id;
   return { token, authUserId };
-});
+};
 
 module.exports = {
   getAll,

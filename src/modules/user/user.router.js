@@ -1,6 +1,6 @@
 const verifyJwt = require('../../middlewares/authenticate.middleware');
 const verifyRole = require('../../middlewares/verifyRole.middleware');
-const createUserValidator = require('../../validators/user.validator');
+const { createUserValidator, loginValidator, updateUserValidator } = require('../../validators/user.validator');
 const { getAll, create, getOne, remove, update, login, bootstrapAmin } = require('./user.controllers');
 const express = require('express');
 
@@ -11,14 +11,14 @@ routerUser.route('/')
   .post(verifyJwt, verifyRole, createUserValidator, create);
 
 routerUser.route('/setup')
-  .post(bootstrapAmin);
+  .post(createUserValidator, bootstrapAmin);
 
 routerUser.route('/login')
-  .post(login);  
+  .post(loginValidator, login);  
 
 routerUser.route('/:id')
   .get(verifyJwt, verifyRole, getOne)
   .delete(verifyJwt, verifyRole, remove)
-  .put(verifyJwt,verifyRole, update);
+  .put(verifyJwt,verifyRole, updateUserValidator, update);
 
 module.exports = routerUser;
