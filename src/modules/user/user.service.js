@@ -22,7 +22,7 @@ const createUser = async (user) => {
 
 const loginSevices = async (email, password) => {
   const user = await User.findOne({ where: { email } });
-  console.log('users', user);
+
   if (!user) throw { status: 400, message: 'Invalid email or password' };
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) throw { status: 400, message: 'Invalid password' };
@@ -94,8 +94,9 @@ const createTokenPass = async (email) => {
 
   // descomentar esta linea cuando ya se esté reallizando el frontend
   // if (resetToken) await sendChangePassword(email, { name: `${isUser.firstName} ${isUser.lastName}`, resetToken });
-  if (resetToken) console.log('token', resetToken);
-  
+  // eliminar este if y el retun cuando se tenga el fronted
+  if (resetToken) return resetToken;
+  return;
 }; 
 
 const resetPassword = async (token, newPassword) => {

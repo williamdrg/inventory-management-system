@@ -16,7 +16,7 @@ const create = catchError(async(req, res) => {
 const login = catchError(async(req, res) => {
   const { email, password } = req.body;
   const user = await loginSevices(email, password);
-  res.json(user);   
+  return res.json(user);   
 });
 
 const getOne = catchError(async(req, res) => {
@@ -51,15 +51,18 @@ const bootstrapAmin = catchError(async (req, res) => {
 
 const requestChangePassword = catchError(async (req, res) => {
   const { email } = req.body;
-  await createTokenPass(email);
-  res.json({ message: 'Password reset token generated successfully.' });
+  // descomentar cuando se tenga el fronted
+  // await createTokenPass(email);
+  // se usa el token momentaneamente para hacer el test y por eso se envía como respuesta
+  const token = await createTokenPass(email);
+  return res.json({ message: 'Password reset token generated successfully.', token });
 }); 
 
 const updatePassword = catchError(async (req, res) => {
   const { token } = req.query;
   const { newPassword } = req.body;
   await resetPassword(token, newPassword);
-  res.status(200).json({ message: 'Password updated successfully.' });
+  return res.status(200).json({ message: 'Password updated successfully.' });
 });
 
 
