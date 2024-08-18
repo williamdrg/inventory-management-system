@@ -64,9 +64,26 @@ const updateUserValidator = [
   validateResult
 ];
 
+const emailVerificationValidator = [
+  check('email')
+    .optional()
+    .isEmail().withMessage('Must be a valid email address')
+    .isLength({ min: 10, max: 50 }).withMessage('Email must be between 10 and 50 characters long'),
+  validateResult
+];
+
+const resetPasswordValidator = [
+  check('newPassword')
+    .exists({ checkFalsy: true }).withMessage('Password is required')
+    .isString().withMessage('Password should be a string')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
+  validateResult
+];
 
 module.exports = {
   createUserValidator,
   loginValidator,
-  updateUserValidator
+  updateUserValidator,
+  emailVerificationValidator,
+  resetPasswordValidator
 };

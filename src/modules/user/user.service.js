@@ -2,6 +2,7 @@ const User = require('../../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const revokeToken = require('../../utils/revokeToken');
+const { sendChangePassword } = require('../../utils/sendEmail');
 
 const fetchAllUsers = async () => {
   return await User.findAll({ attributes: { exclude: 'password' } });
@@ -20,15 +21,15 @@ const createUser = async (user) => {
 };
 
 const loginSevices = async (email, password) => {
-  const user = await User.findOne({ where: { email }});
+  const user = await User.findOne({ where: { email } });
+  console.log('users', user);
   if (!user) throw { status: 400, message: 'Invalid email or password' };
-
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) throw { status: 400, message: 'Invalid password' };
   
   const { id, firstName, lastName, dni, role } = user;
   const userData = { id, firstName, lastName, dni, email, role };
-  const token = jwt.sign(userData, process.env.TOKEN_SECRET, { algorithm: 'HS512', expiresIn: '1d' });
+  const token = jwt.sign(userData, process.env.JWT_TOKEN_SECRET, { algorithm: 'HS512', expiresIn: '1d' });
   return { ...userData, token };
 };
 
@@ -40,7 +41,7 @@ const fetchUserById = async (id) => {
 
 const deleteUser = async (id, token, authUserId) => {
   if (parseInt(id) === 1) throw { status: 403, message: 'Superuser cannot be deleted.' };
-  const result =  await User.destroy({ where: {id} });
+  const result =  await User.destroy({ where: { id } });
   if(!result) throw { status: 404, message: 'user not found' };
 
   if (parseInt(id) !== 1 && parseInt(authUserId) === parseInt(id)) {
@@ -76,12 +77,32 @@ const bootstrapUser = async (user) => {
   const existingUsers = await User.count();
   if (existingUsers > 0) throw { status: 403, message: 'Bootstrap already completed. Cannot create another admin through this route.' };
   
-  const existingEmai = await User.findOne({ where: { email: user.email}});
-  if (existingEmai) throw { status: 400, message: 'Email already in use'};
+  const existingEmai = await User.findOne({ where: { email: user.email } });
+  if (existingEmai) throw { status: 400, message: 'Email already in use' };
 
   const hashedPassword = await bcrypt.hash(user.password, 10);
   return await User.create({ ...user, password: hashedPassword, role: 'admin' }); 
+};
+
+const createTokenPass = async (email) => {
+  const isUser = await User.findOne({ where: { email } });
+  if (!isUser) throw { status: 404, message: 'User not found' };
+
+  const resetToken = jwt.sign({ id: isUser.id }, process.env.JWT_RESET_PASSWORD, 
+    { algorithm: 'HS512', expiresIn: '30m' }
+  );
+
+  // descomentar esta linea cuando ya se esté reallizando el frontend
+  // if (resetToken) await sendChangePassword(email, { name: `${isUser.firstName} ${isUser.lastName}`, resetToken });
+  if (resetToken) console.log('token', resetToken);
   
+}; 
+
+const resetPassword = async (token, newPassword) => {
+  const decoded = jwt.verify(token, process.env.JWT_RESET_PASSWORD, { algorithms: ['HS512'] });
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await User.update({ password: hashedPassword }, { where: { id: decoded.id } });
 };
 
 module.exports = {
@@ -91,5 +112,7 @@ module.exports = {
   deleteUser,
   updateUser,
   loginSevices,
-  bootstrapUser
+  bootstrapUser,
+  createTokenPass,
+  resetPassword
 };

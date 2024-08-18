@@ -8,6 +8,8 @@ export default [
       sourceType: "commonjs",
       globals: {
         process: "readonly",
+        test: "readonly",
+        expect: "readonly"
       },
     },
     rules: {
@@ -16,6 +18,7 @@ export default [
       indent: ["error", 2],        // Espaciado de 2 espacios
       "no-console": "off",          // Permitir el uso de console.log
       "semi": ["error", "always"],   // Usar punto y coma
+      "object-curly-spacing": ["error", "always"], // Espacio dentro de llaves
     },
   },
   {

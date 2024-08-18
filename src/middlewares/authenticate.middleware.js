@@ -25,7 +25,7 @@ const verifyJwt = async (req, res, next) => {
 
   jwt.verify(
     token,
-    process.env.TOKEN_SECRET,
+    process.env.JWT_TOKEN_SECRET,
     { algorithms: ['HS512'] },
     (err, decoded) => {
       if (err) {

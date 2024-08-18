@@ -1,5 +1,6 @@
 const catchError = require('../../utils/catchError');
-const { fetchAllUsers, createUser, fetchUserById, deleteUser, updateUser, loginSevices, bootstrapUser } = require('./user.service');
+const getToken = require('./getToken');
+const { fetchAllUsers, createUser, fetchUserById, deleteUser, updateUser, loginSevices, bootstrapUser, createTokenPass, resetPassword } = require('./user.service');
 
 const getAll = catchError(async(req, res) => {
   const users = await fetchAllUsers();
@@ -48,12 +49,19 @@ const bootstrapAmin = catchError(async (req, res) => {
   return res.status(201).json(user);
 });
 
-const getToken = (req) => {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  const token = authHeader.split(' ')[1];
-  const authUserId = req.user.id;
-  return { token, authUserId };
-};
+const requestChangePassword = catchError(async (req, res) => {
+  const { email } = req.body;
+  await createTokenPass(email);
+  res.json({ message: 'Password reset token generated successfully.' });
+}); 
+
+const updatePassword = catchError(async (req, res) => {
+  const { token } = req.query;
+  const { newPassword } = req.body;
+  await resetPassword(token, newPassword);
+  res.status(200).json({ message: 'Password updated successfully.' });
+});
+
 
 module.exports = {
   getAll,
@@ -62,5 +70,7 @@ module.exports = {
   remove,
   update,
   login,
-  bootstrapAmin
+  bootstrapAmin,
+  requestChangePassword,
+  updatePassword
 };
