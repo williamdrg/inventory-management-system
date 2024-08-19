@@ -17,7 +17,9 @@ const createUser = async (user) => {
     };
   }
   const hashedPassword = await bcrypt.hash(user.password, 10);
-  return await User.create({ ...user, password: hashedPassword });
+  const newUser = await User.create({ ...user, password: hashedPassword });
+  const { password, ...userWithoutPassword } = newUser.toJSON();
+  return userWithoutPassword;
 };
 
 const loginSevices = async (email, password) => {
@@ -81,7 +83,9 @@ const bootstrapUser = async (user) => {
   if (existingEmai) throw { status: 400, message: 'Email already in use' };
 
   const hashedPassword = await bcrypt.hash(user.password, 10);
-  return await User.create({ ...user, password: hashedPassword, role: 'admin' }); 
+  const userAdmin = await User.create({ ...user, password: hashedPassword, role: 'admin' });
+  const { password, ...admin } = userAdmin.toJSON();
+  return admin;
 };
 
 const createTokenPass = async (email) => {

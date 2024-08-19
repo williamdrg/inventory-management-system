@@ -21,9 +21,9 @@ const guest = {
 
 let userId;
 let token;
+let tokenReset;
 
-
-test('Response status code is 201', async () => {
+test('POST /setup -> Creates admin user, responds with status 201 and correct firstName', async () => {
   const res = await request(app)
     .post(`${BASE_URL}/setup`)
     .send(admin);
@@ -33,7 +33,7 @@ test('Response status code is 201', async () => {
   expect(res.body.firstName).toBe(admin.firstName);
 });
 
-test('POST -> /BASE_UL/users/login, should return', async () => {
+test('POST /login -> Logs in as admin, responds with status 200 and returns a token', async () => {
   const res = await request(app)
     .post(`${BASE_URL}/login`)
     .send({ email: admin.email, password: admin.password });
@@ -44,7 +44,7 @@ test('POST -> /BASE_UL/users/login, should return', async () => {
   expect(res.body).toBeDefined();
 });
 
-test('POST -> /BASE_UL, should return statusCode 201, and res.body.firtName === guest.firstName"', async () => {
+test('POST BASE_URL -> Creates guest user, responds with status 201 and correct firstName', async () => {
   const res = await request(app)
     .post(BASE_URL)
     .set('Authorization',`Bearer ${token}`)
@@ -58,7 +58,7 @@ test('POST -> /BASE_UL, should return statusCode 201, and res.body.firtName === 
   expect(res.body.firstName).toBe(guest.firstName);
 });
 
-test('GET -> "/BASE_UL", BASE_URL should return statusCode 200, and res.body.length === 2', async () => {
+test('GET BASE_URL -> Retrieves all users, responds with status 200 and an array of length 2', async () => {
   const res = await request(app)
     .get(BASE_URL)
     .set('Authorization',`Bearer ${token}`);
@@ -69,7 +69,7 @@ test('GET -> "/BASE_UL", BASE_URL should return statusCode 200, and res.body.len
   
 }); 
 
-test('GET -> BASE_URL/:id, should return statusCode 200, and res.body == admin.firstName', async () => {
+test('GET BASE_UR/:id -> Retrieves guest user by ID, responds with status 200 and correct firstName', async () => {
   const res = await request(app)
     .get(`${BASE_URL}/${userId}`)
     .set('Authorization',`Bearer ${token}`);
@@ -80,7 +80,7 @@ test('GET -> BASE_URL/:id, should return statusCode 200, and res.body == admin.f
 
 });
 
-test('PUT -> BASE_URL/:id, should return statusCode 200, and res.body.firstName == userUpdate.firtName', async () => {
+test('PUT -> BASE_URL/:id, Updates guest user, responds with status 200 and updated firstName', async () => {
   
   const userUpdate =  {
     firstName: 'marcos',
@@ -100,7 +100,29 @@ test('PUT -> BASE_URL/:id, should return statusCode 200, and res.body.firstName 
 
 });
 
-test('DELETE -> BASE_URL/;id, should return statusCode 204', async() => {
+test('POST /request_password -> Requests password reset, responds with status 200 and returns a token', async() => {
+  const res = await request(app)
+    .post(`${BASE_URL}/request_password`)
+    .send({ email: guest.email });
+
+  tokenReset = res.body.token;
+  
+  expect(res.status).toBe(200);
+  expect(res.body).toBeDefined();
+  expect(res.body.message).toBe('Password reset token generated successfully.');
+});
+
+test('POST /update_password -> Resets password using token, responds with status 200 and success message', async() => {
+  const res = await request(app)
+    .post(`${BASE_URL}/update_password?token=${tokenReset}`)
+    .send({ newPassword: '1234567' });
+  
+  expect(res.status).toBe(200);
+  expect(res.body).toBeDefined();
+  expect(res.body.message).toBe('Password updated successfully.');
+});
+
+test('DELETE -> BASE_URL/;id, Deletes guest user, responds with status 204', async() => {
   const res = await request(app)
     .delete(`${BASE_URL}/${userId}`)
     .set('Authorization',`Bearer ${token}`);
@@ -108,7 +130,7 @@ test('DELETE -> BASE_URL/;id, should return statusCode 204', async() => {
   expect(res.statusCode).toBe(204);
 });
 
-test('DELETE -> BASE_URL/;id, should return statusCode 204', async() => {
+test('DELETE -> Prevents superuser deletion, responds with status 403 and error message', async() => {
   const res = await request(app)
     .delete(`${BASE_URL}/1`)
     .set('Authorization',`Bearer ${token}`);
@@ -116,6 +138,6 @@ test('DELETE -> BASE_URL/;id, should return statusCode 204', async() => {
   expect(res.status).toBe(403);
   expect(res.body.message).toBe('Superuser cannot be deleted.');
 
-  await User.destroy({ where: {id: 1}});
+  await User.destroy({ where: { id: 1 } });
 
 });
