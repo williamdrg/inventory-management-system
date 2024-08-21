@@ -73,8 +73,26 @@ const emailVerificationValidator = [
 ];
 
 const resetPasswordValidator = [
-  check('newPassword')
+  check('password')
     .exists({ checkFalsy: true }).withMessage('Password is required')
+    .isString().withMessage('Password should be a string')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
+  validateResult
+];
+
+const changePassLoginValidator = [
+  check('currentPassword')
+    .exists({ checkFalsy: true }).withMessage('currentPassword is required')
+    .isString().withMessage('Password should be a string')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
+
+  check('newPassword')
+    .exists({ checkFalsy: true }).withMessage('newPassword is required')
+    .isString().withMessage('Password should be a string')
+    .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
+
+  check('confirmPassword')
+    .exists({ checkFalsy: true }).withMessage('confirmPassword is required')
     .isString().withMessage('Password should be a string')
     .isLength({ min: 4 }).withMessage('Password must be at least 4 characters long'),
   validateResult
@@ -85,5 +103,6 @@ module.exports = {
   loginValidator,
   updateUserValidator,
   emailVerificationValidator,
-  resetPasswordValidator
+  resetPasswordValidator,
+  changePassLoginValidator
 };

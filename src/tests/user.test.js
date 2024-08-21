@@ -69,7 +69,7 @@ test('GET BASE_URL -> Retrieves all users, responds with status 200 and an array
   
 }); 
 
-test('GET BASE_UR/:id -> Retrieves guest user by ID, responds with status 200 and correct firstName', async () => {
+test('GET BASE_URL/:id -> Retrieves guest user by ID, responds with status 200 and correct firstName', async () => {
   const res = await request(app)
     .get(`${BASE_URL}/${userId}`)
     .set('Authorization',`Bearer ${token}`);

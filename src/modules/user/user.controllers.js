@@ -1,6 +1,6 @@
 const catchError = require('../../utils/catchError');
 const getToken = require('./getToken');
-const { fetchAllUsers, createUser, fetchUserById, deleteUser, updateUser, loginSevices, bootstrapUser, createTokenPass, resetPassword } = require('./user.service');
+const { fetchAllUsers, createUser, fetchUserById, deleteUser, updateUser, loginSevices, bootstrapUser, createTokenPass, resetPassword, changePasswordService, verify2FAService, enable2FAService } = require('./user.service');
 
 const getAll = catchError(async(req, res) => {
   const users = await fetchAllUsers();
@@ -58,11 +58,33 @@ const requestChangePassword = catchError(async (req, res) => {
   return res.json({ message: 'Password reset token generated successfully.', token });
 }); 
 
-const updatePassword = catchError(async (req, res) => {
+const resetPasswordViaEmailLink = catchError(async (req, res) => {
   const { token } = req.query;
-  const { newPassword } = req.body;
-  await resetPassword(token, newPassword);
+  const { password } = req.body;
+  await resetPassword(token, password);
   return res.status(200).json({ message: 'Password updated successfully.' });
+});
+
+const changePasswordWhileLoggedIn = catchError(async (req, res) => {
+  const { id } = req.user;
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const { token } = getToken(req);
+
+  const result = await changePasswordService(id, currentPassword, newPassword, confirmPassword, token);
+  return res.json(result);
+});
+
+const enable2FA = catchError(async (req, res) => {
+  const { password, enable } = req.body;
+  const { id } = req.user;
+  await enable2FAService(id, password, enable);
+  res.json({ message: '2FA enabled. A 6-digit code will be sent to your email for verification during login.' });
+});
+
+const verify2FA = catchError(async(req, res) => {
+  const { email, code } = req.body; 
+  const user = await verify2FAService(email, code);
+  return res.json(user);
 });
 
 
@@ -75,5 +97,8 @@ module.exports = {
   login,
   bootstrapAmin,
   requestChangePassword,
-  updatePassword
+  resetPasswordViaEmailLink,
+  changePasswordWhileLoggedIn,
+  enable2FA,
+  verify2FA
 };
