@@ -1,18 +1,19 @@
 require('dotenv').config();
 const transporter = require('./mailer');
-const mjml = require('mjml');
+// const mjml = require('mjml');
 const fs = require('fs');
 const path = require('path');
 
 const generateEmailTemplate = (templateName, data) => {
-  const templatePath = path.join(__dirname, `../views/${templateName}.mjml`);
+  const templatePath = path.join(__dirname, `../views/${templateName}.html`);
   let template = fs.readFileSync(templatePath, 'utf8');
   
   Object.keys(data).forEach(key => {
     template = template.replace(`{${key}}`, data[key]);
   });
-  const { html } = mjml(template);
-  return html;
+  // const { html } = mjml(template);
+  // return html;
+  return template;
 };
 
 const sendEmail = async (email, subject, template) => {

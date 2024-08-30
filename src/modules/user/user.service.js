@@ -6,6 +6,10 @@ const crypto = require('crypto');
 const { sendChangePassword, sendTwoFactorCodeByEmail } = require('../../utils/sendEmail');
 
 const propsInclude = ['id', 'firstName', 'dni', 'lastName', 'email', 'role'];
+/**
+ * @module userServices
+ * @description Este módulo contiene la lógica de negocio para las operaciones relacionadas con los usuarios. Es utilizado por el `userController`.
+ */
 
 /**
  * Obtiene todos los usuarios con los atributos especificados.
@@ -22,7 +26,7 @@ const fetchAllUsers = async () => {
  * el correo electrónico ya está en uso.
  */
 
-const createUser = async (user) => {
+const createUserService = async (user) => {
   const exitingEmail = await User.findOne({ where: { email: user.email } });
   if (exitingEmail) throw { status: 400,message: 'Email already in use' };
   
@@ -57,11 +61,8 @@ const loginSevices = async (email, password) => {
     user.twoFactorExpires = new Date(new Date().getTime() + 5 * 60 * 1000);
     await user.save();
 
-    /*  const obj2FA = { 
-      name: `${user.firstName} ${user.lastName}`,
-      code: code.toString().split('').join(' ')
-    }; */
-    // await sendTwoFactorCodeByEmail(email, obj2FA);
+    /*    const obj2FA = { code: code.toString().split('').join(' ') };
+    await sendTwoFactorCodeByEmail(email, obj2FA); */
 
     return { message: 'A 6-digit code has been sent to your email. Please enter it to complete the login.', twoFactorRequired: true, code };
   }
@@ -120,7 +121,7 @@ const deleteUser = async (id, token, authUserId) => {
  * los datos actualizados del usuario basados en el array `propsInclude`.
  */
 
-const updateUser = async (id, token, authUserId, user) => {
+const updateUserService = async (id, token, authUserId, user) => {
 
   const existingUser = await User.findByPk(id);
   if (!existingUser) throw { status: 404, message: 'User not found' };
@@ -301,7 +302,7 @@ const enable2FAService = async (userId, password, enable) => {
  * @returns devuelve un objeto que incluye la información del usuario y un token JWT. 
  * La información del usuario se obtiene de la base de datos y se actualiza si el código
  * 2FA es válido y no ha expirado. El token JWT se genera utilizando los datos del usuario y un token
- * secreto, y expira en 1 día.
+ * secreto, y expira en 1 hora.
  */
 
 const verify2FAService = async (email, code) => {
@@ -318,16 +319,16 @@ const verify2FAService = async (email, code) => {
 
   const objUser = user.toJSON();
   const userData = Object.fromEntries(propsInclude.map(key => [key, objUser[key]]));
-  const token = jwt.sign(userData, process.env.JWT_TOKEN_SECRET, { algorithm: 'HS512', expiresIn: '1d' });
+  const token = jwt.sign(userData, process.env.JWT_TOKEN_SECRET, { algorithm: 'HS512', expiresIn: '1h' });
   return { ...userData, token };
 };
 
 module.exports = {
   fetchAllUsers,
-  createUser,
+  createUserService,
   fetchUserById,
   deleteUser,
-  updateUser,
+  updateUserService,
   loginSevices,
   bootstrapUser,
   createTokenPass,
